@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">ASPController</string>
     <string name="action_settings">Settings</string>
+
+
+    <string name="request_button">Запрос</string>
+
 </resources>

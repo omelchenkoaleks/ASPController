@@ -1,5 +1,6 @@
 package com.omelchenkoaleks.aspcontroller;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,6 +9,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +36,70 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        SendRequest sendRequest = new SendRequest();
+
+
+    }
+
+    private class SendRequest extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            String responseFromServer = null;
+
+            try {
+                String url = strings[0];
+
+                URL obj = new URL(url);
+
+                HttpURLConnection connection = (HttpURLConnection) obj.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Accept-Language", "en-US,en,q=0.5");
+
+                String urlParameters = strings[1] + "=" + strings[2];
+
+
+                // Полученные данные (urlParameters) передаем в поток запроса.
+
+                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(wr, "UTF-8"));
+                writer.write(urlParameters);
+
+                wr.close();
+                writer.close();
+
+
+                // Получаем информацию из потока ответа.
+
+                int responseCode = connection.getResponseCode();
+
+                BufferedReader reader = new BufferedReader
+                        (new InputStreamReader(connection.getInputStream()));
+
+                String inputLine;
+
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = reader.readLine()) != null) {
+                    response.append(inputLine);
+                }
+
+                reader.close();
+
+                responseFromServer = response.toString();
+
+            } catch (Exception ex) {
+                return ex.getMessage();
+            }
+
+            return responseFromServer;
+        }
+
+        @Override
+        protected void onPostExecute(String message) {
+            Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override

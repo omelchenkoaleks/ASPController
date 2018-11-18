@@ -9,13 +9,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -37,8 +42,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        SendRequest sendRequest = new SendRequest();
+        Button button = findViewById(R.id.request_button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SendRequest sendRequest = new SendRequest();
 
+                String JSONObj = new Gson().toJson("John");
+
+                sendRequest.execute("http://bytepp.azurewebsites.net/Home/Hello", "name", JSONObj);
+            }
+        });
 
     }
 
@@ -98,7 +112,15 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String message) {
-            Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+
+            Type type = new TypeToken<String>() {}.getType();
+
+            Gson gson = new Gson();
+
+            String str = gson.fromJson(message, type);
+
+            Toast.makeText(MainActivity.this, "JSON объект: "
+                    + message + str, Toast.LENGTH_LONG).show();
         }
     }
 
